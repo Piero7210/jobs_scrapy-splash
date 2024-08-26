@@ -1,0 +1,25 @@
+# Ignore Python bytecode files
+__pycache__/
+*.pyc
+
+# Ignore Scrapy generated files
+.scrapy/
+
+# Ignore logs
+*.log
+
+# Ignore virtual environment
+venv/
+
+# Ignore IDE files
+.vscode/
+.idea/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore project-specific files
+*.csv
+*.json
+*.xml
