@@ -6,6 +6,7 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+from shutil import which
 
 BOT_NAME = "job_scraper"
 
@@ -15,8 +16,13 @@ NEWSPIDER_MODULE = "job_scraper.spiders"
 # Splash settings
 SPLASH_URL = 'http://localhost:8050'
 
+# Configure selenium
+SELENIUM_DRIVER_NAME = 'chrome'
+SELENIUM_DRIVER_EXECUTABLE_PATH = which('chromedriver')  # Assumes you have chromedriver in your PATH
+SELENIUM_DRIVER_ARGUMENTS = ['--headless']  # If you want to see the browser action, remove --headless
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = "job_scraper (+https://www.yourdomain.com)"
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -62,6 +68,7 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy_splash.SplashCookiesMiddleware': 723,
     'scrapy_splash.SplashMiddleware': 725,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+    'scrapy_selenium.SeleniumMiddleware': 800,
 }
 
 DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
