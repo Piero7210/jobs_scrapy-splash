@@ -3,6 +3,7 @@ from scrapy_splash import SplashRequest
 from datetime import datetime, timedelta
 from job_scraper.items import JobItem
 from job_scraper.utils.sql_alchemy import Job, SessionLocal  # Asegúrate de que esté bien configurado
+from job_scraper.utils.sql_alchemy_pre_db import PreJob, SessionLocal  # Asegúrate de que esté bien configurado
 from sqlalchemy.exc import SQLAlchemyError
 from job_scraper.utils.description_extraction import get_keywords # Importa la función OpenAI Api
 import traceback
@@ -131,14 +132,49 @@ class IndeedSpider(scrapy.Spider):
             item['seniority'] = str(result_keywords.get('Seniority', 'no especificado')) if result_keywords else 'no especificado'
             item['work_mode'] = str(result_keywords.get('Modalidad de trabajo', 'Presencial')) if result_keywords else 'Presencial'
             item['type_of_job'] = type_of_job
+            
+            # Guardar los datos en la base de datos
+            self.save_pre_db(item) # Guarda el item sin usar GPT-3.5
+            self.save_to_db(item)
     
         except Exception as e:
             self.logger.error(f"Error al procesar la descripción del empleo: {e}")
             self.logger.error(traceback.format_exc())
             return None
         
-        # Guardar los datos en la base de datos
-        self.save_to_db(item)
+    
+    def save_pre_db(self, item):
+        """
+        Saves only the item without the use of GPT-3.5.
+
+        Args:
+            item (dict): The item to be saved.
+
+        Returns:
+            None
+        """
+        session = SessionLocal()
+        try:
+            job_record = PreJob(
+                company_name=item['company'],
+                job_title=item['title'],
+                location=item['location'],
+                date=item['date'],
+                type_of_job=item.get('type_of_job'),
+                platform=item['platform'],
+                link_url=item['link_url'],
+                keyword=item['keyword'],
+                state=1,
+                date_scraped=item['date_scraped']
+            )
+            session.add(job_record)
+            session.commit()
+            self.logger.info(f"Pre Item successfully saved to DB: {item['title']} at {item['company']}")
+        except SQLAlchemyError as e:
+            self.log(f"Error occurred during commit: {e}")
+            session.rollback()
+        finally:
+            session.close()
         
     def save_to_db(self, item):
         """
