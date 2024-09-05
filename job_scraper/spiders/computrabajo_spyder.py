@@ -2,7 +2,7 @@ import scrapy
 from datetime import datetime, timedelta
 from job_scraper.items import JobItem  # Asegúrate de que el JobItem esté definido en items.py
 from job_scraper.utils.sql_alchemy import Job, SessionLocal  # Asegúrate de que esté bien configurado
-from job_scraper.utils.sql_alchemy_pre_db import PreJob, SessionLocal  # Asegúrate de que esté bien configurado
+from job_scraper.utils.sql_alchemy_pre_db import PreJob
 from sqlalchemy.exc import SQLAlchemyError
 from job_scraper.utils.langchain_descript_extraction import get_keywords # Importa la función OpenAI Api
 import traceback
@@ -94,6 +94,7 @@ class ComputrabajoSpider(scrapy.Spider):
             # Obtiene la descripción del empleo
             job_description = response.xpath("//div[@class='mb40 pb40 bb1'][@div-link='oferta']//p[@class='mbB']/text()").getall()
             job_description = "\n".join(job_description).strip() if job_description else ''
+            item['description'] = job_description
                   
             # Obtiene el tipo de empleo
             type_of_job = response.xpath("//div[@class='mb40 pb40 bb1'][@div-link='oferta']//div[@class='mbB']//span[@class='tag base mb10'][3]/text()").get()
@@ -144,6 +145,7 @@ class ComputrabajoSpider(scrapy.Spider):
                 date=item['date'],
                 type_of_job=item.get('type_of_job'),
                 platform=item['platform'],
+                description=item['description'],
                 link_url=item['link_url'],
                 keyword=item['keyword'],
                 state=1,

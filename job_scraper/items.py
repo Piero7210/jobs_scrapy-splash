@@ -20,6 +20,7 @@ class JobItem(scrapy.Item):
     seniority = scrapy.Field()
     type_of_job = scrapy.Field()
     work_mode = scrapy.Field()
+    description = scrapy.Field()
     lgtbq = scrapy.Field()
     keyword = scrapy.Field()
     state = scrapy.Field()

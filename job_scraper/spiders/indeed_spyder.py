@@ -3,7 +3,7 @@ from scrapy_splash import SplashRequest
 from datetime import datetime, timedelta
 from job_scraper.items import JobItem
 from job_scraper.utils.sql_alchemy import Job, SessionLocal  # Asegúrate de que esté bien configurado
-from job_scraper.utils.sql_alchemy_pre_db import PreJob, SessionLocal  # Asegúrate de que esté bien configurado
+from job_scraper.utils.sql_alchemy_pre_db import PreJob
 from sqlalchemy.exc import SQLAlchemyError
 from job_scraper.utils.description_extraction import get_keywords # Importa la función OpenAI Api
 import traceback
@@ -109,6 +109,7 @@ class IndeedSpider(scrapy.Spider):
                     job_description_paragraphs.append(element.get().strip())                                
             # Combina los párrafos en una sola cadena
             job_description = '\n'.join(job_description_paragraphs)
+            item['description'] = job_description
                     
             # Selecciona el tercer <h2> (ajusta el índice según sea necesario)
             type_of_job = response.css('div.js-match-insights-provider-tvvxwd.ecydgvn1::text').get()
@@ -161,6 +162,7 @@ class IndeedSpider(scrapy.Spider):
                 location=item['location'],
                 date=item['date'],
                 type_of_job=item.get('type_of_job'),
+                description=item['description'],
                 platform=item['platform'],
                 link_url=item['link_url'],
                 keyword=item['keyword'],

@@ -27,6 +27,7 @@ class PreJob(Base):
     location = Column(String(200), nullable=False)
     date = Column(DateTime, nullable=False)
     type_of_job = Column(String(100), nullable=True)
+    description = Column(Text, nullable=False)
     platform = Column(String(100), nullable=False)
     link_url = Column(Text, nullable=False)
     state = Column(Integer, nullable=False)
