@@ -11,6 +11,7 @@ class ComputrabajoSpider(scrapy.Spider):
     name = "computrabajo_spider"
     allowed_domains = ["computrabajo.com.pe", "pe.computrabajo.com"]
     start_urls = []
+    date_scraped = datetime.now().strftime("%Y-%m-%d")
 
     # Generar las URLs iniciales para cada palabra clave
     def __init__(self, *args, **kwargs):
@@ -67,7 +68,7 @@ class ComputrabajoSpider(scrapy.Spider):
                 print(f"Link: {item['link_url']}")
                 
                 item['platform'] = 'Computrabajo'
-                item['date_scraped'] = datetime.now().strftime("%Y-%m-%d")
+                item['date_scraped'] = self.date_scraped
                 item['keyword'] = response.url.split('/')[-1].split('-')[-1].split('?')[0]
                 
                 # Realizar una solicitud para obtener la descripción del empleo

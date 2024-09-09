@@ -9,7 +9,7 @@ from job_scraper.utils.sql_alchemy import Job, SessionLocal
 from job_scraper.items import JobItem
 import traceback
 
-class LinkedinSpider(scrapy.Spider):
+class LinkedinSpider1(scrapy.Spider):
     name = 'linkedin_spider'
     keywords_jobs = ['Asistente', 'Practicante', 'Asesor', 'Auxiliar', 'Analista', 'Tecnico', 'Ejecutivo', 
                      'Diseñador', 'Representante', 'Desarrollador', 'Coordinador', 'Soporte', 'Jefe', 

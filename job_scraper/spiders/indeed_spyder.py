@@ -12,12 +12,13 @@ class IndeedSpider(scrapy.Spider):
     name = "indeed_spider"
     allowed_domains = ["indeed.com", "localhost"]
     start_urls = []
+    date_scraped = datetime.now().strftime("%Y-%m-%d")
 
     # Generar las URLs iniciales para cada palabra clave
     def __init__(self, *args, **kwargs):
         super(IndeedSpider, self).__init__(*args, **kwargs)
         # keywords_jobs = ['Asistente', 'Practicante', 'Asesor', 'Auxiliar', 'Analista', 'Tecnico', 'Ejecutivo', 'Diseñador', 'Representante', 'Desarrollador', 'Coordinador', 'Soporte', 'Jefe', 'Vendedor', 'Promotor', 'Atencion']
-        keywords_jobs = ['Data']
+        keywords_jobs = ['Asistente']
         for keyword in keywords_jobs:
             self.start_urls.extend([f'https://pe.indeed.com/jobs?q={keyword}&l=Lima&sort=date&fromage=7&start={i}' for i in range(0, 70, 10)])
             
@@ -72,8 +73,8 @@ class IndeedSpider(scrapy.Spider):
                 item['link_url'] = response.urljoin(job_description_href)
                 
                 item['platform'] = 'Indeed'
-                item['date_scraped'] = datetime.now().strftime("%Y-%m-%d")
-                item['keyword'] = 'data'  # Palabra clave utilizada para la búsqueda
+                item['date_scraped'] = self.date_scraped
+                item['keyword'] = response.url.split('q=')[1].split('&')[0]  # Palabra clave utilizada para la búsqueda
 
                 # Realizar una solicitud para obtener la descripción del empleo
                 yield SplashRequest(
@@ -102,7 +103,7 @@ class IndeedSpider(scrapy.Spider):
             # Inicializa una lista para almacenar los párrafos
             job_description_paragraphs = []        
             # Encuentra el div objetivo
-            target_div = response.css('div.jobsearch-JobComponent-description').get()
+            target_div = response.css('div.jobsearch-JobComponent-description::text').get()
             # Itera sobre los elementos dentro del target_div
             if target_div:
                 for element in response.css('div.jobsearch-JobComponent-description p, div.jobsearch-JobComponent-description li'):
@@ -116,7 +117,7 @@ class IndeedSpider(scrapy.Spider):
             if type_of_job in ['Tiempo completo', 'Tiempo parcial', 'Por contrato', 'Indefinido', 'Temporal', 'Medio tiempo']:
                 type_of_job = type_of_job.strip()
             else:
-                type_of_job = response.css('div.js-match-insights-provider-tvvxwd.ecydgvn1::text').get_all()[1].strip()
+                type_of_job = 'No especificado'
             
             # Obtiene las palabras clave de la descripción del empleo
             result_keywords = get_keywords(job_description, item['title'], item['company'], item['location'])

@@ -8,7 +8,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from job_scraper.utils.description_extraction import get_keywords
 import traceback
 
-
 class BumeranSpider(scrapy.Spider):
     name = "bumeran_spider"
     allowed_domains = ["bumeran.com.pe", "localhost"]
@@ -62,13 +61,13 @@ class BumeranSpider(scrapy.Spider):
         self.log(f"URL: {response.url}, HTTP Status: {response.status}")
 
         # Obtiene los elementos de la página
-        company_elements = response.css('h3.sc-kIXKos.fxWEQZ')
+        company_elements = response.css('h3.sc-kIXKos.fxWEQZ') # Ajustar el selector según tu HTML (suele cambiar)
         print(f'Company: {company_elements}')
-        title_elements = response.css('h3.sc-dCVVYJ.kpFBFp')
+        title_elements = response.css('h3.sc-dCVVYJ.kpFBFp') # Ajustar el selector según tu HTML (suele cambiar)
         print(f'Title: {title_elements}')
-        location_elements = response.css('h3.sc-LAuEU.hhLLAT')[::2]
+        location_elements = response.css('h3.sc-LAuEU.hhLLAT')[::2] # Ajustar el selector según tu HTML (suele cambiar)
         print(f'Location: {location_elements}')
-        date_elements = response.css('h3.sc-fGSyRc.cCgKJg')
+        date_elements = response.css('h3.sc-fGSyRc.cCgKJg') # Ajustar el selector según tu HTML (suele cambiar)
         print(f'Date: {date_elements}')
 
         if not company_elements or not title_elements or not location_elements or not date_elements:
@@ -133,7 +132,7 @@ class BumeranSpider(scrapy.Spider):
             item['description'] = job_description
 
             # Extracción del tipo de empleo (debes ajustar el índice según tu HTML)
-            type_of_job = response.css('h2.sc-gAjsMU.coOCyB::text').getall()[4].strip().split(',')[0]
+            type_of_job = response.css('h2.sc-gAjsMU.coOCyB::text').getall()[4].strip().split(',')[0] # Ajustar el selector según tu HTML (suele cambiar)
 
             # Obtiene las palabras clave de la descripción del empleo
             result_keywords = get_keywords(job_description, item['title'], item['company'], item['location'])
