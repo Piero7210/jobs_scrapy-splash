@@ -16,10 +16,9 @@ class ComputrabajoSpider(scrapy.Spider):
     # Generar las URLs iniciales para cada palabra clave
     def __init__(self, *args, **kwargs):
         super(ComputrabajoSpider, self).__init__(*args, **kwargs)
-        # keywords_jobs = ['Asistente', 'Practicante', 'Asesor', 'Auxiliar', 'Analista', 'Tecnico', 'Ejecutivo', 'Diseñador', 'Representante', 'Desarrollador', 'Coordinador', 'Soporte', 'Jefe', 'Vendedor', 'Promotor', 'Atencion']
-        keywords_jobs = ['Asistente']
+        keywords_jobs = ['Asistente', 'Practicante', 'Asesor', 'Auxiliar', 'Analista', 'Tecnico', 'Ejecutivo', 'Diseñador', 'Representante', 'Desarrollador', 'Coordinador', 'Soporte', 'Jefe', 'Vendedor', 'Promotor', 'Atencion']
         for keyword in keywords_jobs:
-            self.start_urls.extend([f'https://pe.computrabajo.com/trabajo-de-{keyword}?by=publicationtime&pubdate=7&p={i}' for i in range(1, 6)])
+            self.start_urls.extend([f'https://pe.computrabajo.com/trabajo-de-{keyword}?by=publicationtime&pubdate=7&p={i}' for i in range(1, 2)])
 
     def parse(self, response):      
         """

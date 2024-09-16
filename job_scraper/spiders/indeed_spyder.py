@@ -17,10 +17,9 @@ class IndeedSpider(scrapy.Spider):
     # Generar las URLs iniciales para cada palabra clave
     def __init__(self, *args, **kwargs):
         super(IndeedSpider, self).__init__(*args, **kwargs)
-        # keywords_jobs = ['Asistente', 'Practicante', 'Asesor', 'Auxiliar', 'Analista', 'Tecnico', 'Ejecutivo', 'Diseñador', 'Representante', 'Desarrollador', 'Coordinador', 'Soporte', 'Jefe', 'Vendedor', 'Promotor', 'Atencion']
-        keywords_jobs = ['Asistente']
+        keywords_jobs = ['Asistente', 'Practicante', 'Asesor', 'Auxiliar', 'Analista', 'Tecnico', 'Ejecutivo', 'Diseñador', 'Representante', 'Desarrollador', 'Coordinador', 'Soporte', 'Jefe', 'Vendedor', 'Promotor', 'Atencion']
         for keyword in keywords_jobs:
-            self.start_urls.extend([f'https://pe.indeed.com/jobs?q={keyword}&l=Lima&sort=date&fromage=7&start={i}' for i in range(0, 70, 10)])
+            self.start_urls.extend([f'https://pe.indeed.com/jobs?q={keyword}&l=Lima&sort=date&fromage=7&start={i}' for i in range(0, 10, 10)])
             
     def start_requests(self):
         """
@@ -101,13 +100,18 @@ class IndeedSpider(scrapy.Spider):
         
         try:
             # Inicializa una lista para almacenar los párrafos
-            job_description_paragraphs = []        
+            job_description_paragraphs = []
+
             # Encuentra el div objetivo
-            target_div = response.css('div.jobsearch-JobComponent-description::text').get()
+            target_div = response.css('div.jobsearch-JobComponent-description')
+
             # Itera sobre los elementos dentro del target_div
             if target_div:
                 for element in response.css('div.jobsearch-JobComponent-description p, div.jobsearch-JobComponent-description li'):
-                    job_description_paragraphs.append(element.get().strip())                                
+                    # Usa .css('::text') para obtener solo el texto dentro de los elementos
+                    paragraph = element.css('::text').getall()
+                    job_description_paragraphs.append(' '.join(paragraph).strip())
+
             # Combina los párrafos en una sola cadena
             job_description = '\n'.join(job_description_paragraphs)
             item['description'] = job_description

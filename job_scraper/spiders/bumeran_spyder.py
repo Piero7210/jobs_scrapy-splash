@@ -29,25 +29,15 @@ class BumeranSpider(scrapy.Spider):
 
         Yields:
             SplashRequest: A scrapy Request with Splash parameters.
-        """
-        lua_script = """
-        function main(splash, args)
-        splash:init_cookies(splash.args.cookies)
-        splash:go(args.url)
-        splash:wait(10)  -- Aumenta el tiempo de espera si es necesario
-        return {
-            html = splash:html(),
-            png = splash:png(),  -- Para guardar una captura de pantalla
-            cookies = splash:get_cookies(),
-        }
-        end
-        """        
+        """       
         for url in self.start_urls:
             yield SplashRequest(
                 url,
                 self.parse,
-                endpoint='execute',
-                args={'lua_source': lua_script, 'wait': 10}
+                endpoint='render.html',
+                args={'wait': 10,
+                      'html': 1,
+                },
             )            
 
     def parse(self, response):
