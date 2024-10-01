@@ -15,67 +15,67 @@ llm = ChatOpenAI(api_key=api_key, model="gpt-3.5-turbo", temperature=0.7)
 
 # Definir la plantilla del prompt
 prompt_template = """
-Estoy realizando un web scraping de ofertas de trabajo de distintas plataformas laborales. Necesito que identifiques y extraigas las palabras clave de las siguientes categorías de la descripción de trabajo proporcionada:
-1. Soft skills
-2. Hard skills
-3. Nivel educativo (según esta lista: Estudiante, Egresado y/o Bachiller, Posgrado)
-4. Profesiones/carreras requeridas
-5. Si hay información relacionada con LGTBQ+, añade un campo llamado 'LGTBQ+' y llénalo solo con True o False según corresponda.
-6. Seniority: Entry, Mid, Senior (si es posible). Infiere según el texto de la descripción de trabajo y completa el campo.
-7. Si hay información sobre la modalidad de trabajo (Presencial, Remoto, Hibrido), añade un campo llamado 'Modalidad de trabajo' y llénalo con el valor correspondiente. Si no hay información, usa 'Presencial'.
+    Estoy realizando un web scraping de ofertas de trabajo de distintas plataformas laborales. Necesito que identifiques y extraigas las palabras clave de las siguientes categorías de la descripción de trabajo proporcionada:
+    1. Soft skills
+    2. Hard skills
+    3. Nivel educativo (según esta lista: Estudiante, Egresado y/o Bachiller, Posgrado)
+    4. Profesiones/carreras requeridas
+    5. Si hay información relacionada con LGTBQ+, añade un campo llamado 'LGTBQ+' y llénalo solo con True o False según corresponda.
+    6. Seniority: Entry, Mid, Senior (si es posible). Infiere según el texto de la descripción de trabajo y completa el campo.
+    7. Si hay información sobre la modalidad de trabajo (Presencial, Remoto, Hibrido), añade un campo llamado 'Modalidad de trabajo' y llénalo con el valor correspondiente. Si no hay información, usa 'Presencial'.
 
-Ejemplo 1:
-Puesto: Desarrollador de Software
-Compañía: Empresa X
-Ubicación: Lima, Perú
-Descripción:
-"Buscamos un desarrollador de software con habilidades en trabajo en equipo, resolución de problemas y conocimiento avanzado en Python y SQL. Requerimos que sea Bachiller en Ingeniería de Sistemas o carreras afines. Es un plus si tiene experiencia con tecnologías en la nube. Valoramos un ambiente inclusivo y LGTBQ+ friendly. La modalidad de trabajo es hibrido."
+    Ejemplo 1:
+    Puesto: Desarrollador de Software
+    Compañía: Empresa X
+    Ubicación: Lima, Perú
+    Descripción:
+    "Buscamos un desarrollador de software con habilidades en trabajo en equipo, resolución de problemas y conocimiento avanzado en Python y SQL. Requerimos que sea Bachiller en Ingeniería de Sistemas o carreras afines. Es un plus si tiene experiencia con tecnologías en la nube. Valoramos un ambiente inclusivo y LGTBQ+ friendly. La modalidad de trabajo es hibrido."
 
-Resultados Esperados:
-{{
-    "Soft skills": ["trabajo en equipo", "resolución de problemas"],
-    "Hard skills": ["Python", "SQL", "tecnologías en la nube"],
-    "Nivel educativo": ["Bachiller"],
-    "Profesiones": ["Ingeniería de Sistemas"],
-    "Modalidad de trabajo": "Hibrido",
-    "LGTBQ+": true,
-    "Seniority": "no especificado"
-}}
+    Resultados Esperados:
+    {{
+        "Soft skills": ["trabajo en equipo", "resolución de problemas"],
+        "Hard skills": ["Python", "SQL", "tecnologías en la nube"],
+        "Nivel educativo": ["Bachiller"],
+        "Profesiones": ["Ingeniería de Sistemas"],
+        "Modalidad de trabajo": "Hibrido",
+        "LGTBQ+": true,
+        "Seniority": "no especificado"
+    }}
 
-Ejemplo 2:
-Puesto: Administrador de Empresas
-Compañía: Empresa Y
-Ubicación: Arequipa, Perú
-Descripción:
-"Buscamos un administrador de empresas con habilidades de liderazgo, comunicación efectiva y capacidad de análisis. Requerimos que sea Egresado en Administración de Empresas o carreras afines. Valoramos un ambiente inclusivo y LGTBQ+ friendly. La modalidad de trabajo es en remoto."
+    Ejemplo 2:
+    Puesto: Administrador de Empresas
+    Compañía: Empresa Y
+    Ubicación: Arequipa, Perú
+    Descripción:
+    "Buscamos un administrador de empresas con habilidades de liderazgo, comunicación efectiva y capacidad de análisis. Requerimos que sea Egresado en Administración de Empresas o carreras afines. Valoramos un ambiente inclusivo y LGTBQ+ friendly. La modalidad de trabajo es en remoto."
 
-Resultados Esperados:
-{{
-    "Soft skills": ["liderazgo", "comunicación efectiva", "capacidad de análisis"],
-    "Hard skills": [],
-    "Nivel educativo": ["Egresado"],
-    "Profesiones": ["Administración de Empresas"],
-    "Modalidad de trabajo": "Remoto",
-    "LGTBQ+": true,
-    "Seniority": "no especificado"
-}}                    
+    Resultados Esperados:
+    {{
+        "Soft skills": ["liderazgo", "comunicación efectiva", "capacidad de análisis"],
+        "Hard skills": [],
+        "Nivel educativo": ["Egresado"],
+        "Profesiones": ["Administración de Empresas"],
+        "Modalidad de trabajo": "Remoto",
+        "LGTBQ+": true,
+        "Seniority": "no especificado"
+    }}                    
 
-Oferta de trabajo:
-Puesto: {title}
-Compañía: {company}
-Ubicación: {location}
-Descripción: {description}
+    Oferta de trabajo:
+    Puesto: {title}
+    Compañía: {company}
+    Ubicación: {location}
+    Descripción: {description}
 
-Resultados:
-{{
-    "Soft skills": [],
-    "Hard skills": [],
-    "Nivel educativo": [],
-    "Profesiones": [],
-    "Modalidad de trabajo": "Presencial",
-    "LGTBQ+": false,
-    "Seniority": "no especificado"
-}}
+    Resultados:
+    {{
+        "Soft skills": [],
+        "Hard skills": [],
+        "Nivel educativo": [],
+        "Profesiones": [],
+        "Modalidad de trabajo": "Presencial",
+        "LGTBQ+": false,
+        "Seniority": "no especificado"
+    }}
 """
 
 # Crear la plantilla de prompt con LangChain

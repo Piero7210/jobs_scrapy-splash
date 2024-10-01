@@ -13,6 +13,9 @@ class IndeedSpider(scrapy.Spider):
     allowed_domains = ["indeed.com", "localhost"]
     start_urls = []
     date_scraped = datetime.now().strftime("%Y-%m-%d")
+    proxy_username = '80c437873bbc27d63aa9'
+    proxy_password = '60e5506f4a26d525'
+    proxy_url = f'http://{proxy_username}:{proxy_password}@gw.dataimpulse.com:823'
 
     # Generar las URLs iniciales para cada palabra clave
     def __init__(self, *args, **kwargs):
@@ -29,7 +32,7 @@ class IndeedSpider(scrapy.Spider):
             SplashRequest: A scrapy Request object with SplashRequest parameters.
         """
         for url in self.start_urls:
-            yield SplashRequest(url, self.parse, args={'wait': 5}, endpoint='render.html')
+            yield SplashRequest(url, self.parse, args={'wait': 5}, endpoint='render.html', meta={'proxy': self.proxy_url})
 
     def parse(self, response):
         """

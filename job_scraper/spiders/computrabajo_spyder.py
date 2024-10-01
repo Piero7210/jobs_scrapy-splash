@@ -9,16 +9,44 @@ import traceback
 
 class ComputrabajoSpider(scrapy.Spider):
     name = "computrabajo_spider"
-    allowed_domains = ["computrabajo.com.pe", "pe.computrabajo.com"]
+    allowed_domains = ["computrabajo.com.pe", "pe.computrabajo.com", "httpbin.org"]
     start_urls = []
     date_scraped = datetime.now().strftime("%Y-%m-%d")
+    proxy_username = '80c437873bbc27d63aa9'
+    proxy_password = '60e5506f4a26d525'
+    proxy_url = f'http://{proxy_username}:{proxy_password}@gw.dataimpulse.com:823'
 
     # Generar las URLs iniciales para cada palabra clave
     def __init__(self, *args, **kwargs):
         super(ComputrabajoSpider, self).__init__(*args, **kwargs)
-        keywords_jobs = ['Asistente', 'Practicante', 'Asesor', 'Auxiliar', 'Analista', 'Tecnico', 'Ejecutivo', 'Diseñador', 'Representante', 'Desarrollador', 'Coordinador', 'Soporte', 'Jefe', 'Vendedor', 'Promotor', 'Atencion']
+        # keywords_jobs = ['Asistente', 'Practicante', 'Asesor', 'Auxiliar', 'Analista', 'Tecnico', 'Ejecutivo', 'Diseñador', 'Representante', 'Desarrollador', 'Coordinador', 'Soporte', 'Jefe', 'Vendedor', 'Promotor', 'Atencion']
+        keywords_jobs = ['Asistente']
         for keyword in keywords_jobs:
-            self.start_urls.extend([f'https://pe.computrabajo.com/trabajo-de-{keyword}?by=publicationtime&pubdate=7&p={i}' for i in range(1, 2)])
+            self.start_urls.extend([f'https://pe.computrabajo.com/trabajo-de-{keyword}?by=publicationtime&pubdate=7&p={i}' for i in range(1, 4)])
+            
+    def start_requests(self):
+        # Check IP before setting proxy
+        yield scrapy.Request('http://httpbin.org/ip', callback=self.check_ip, meta={'proxy': None, 'check': 'before'})
+        
+        # for url in self.start_urls:
+        #     yield scrapy.Request(url, callback=self.parse, meta={'proxy': self.proxy_url})
+            
+    def check_ip(self, response):
+        ip = response.json().get('origin')
+        check = response.meta.get('check')
+        self.log(f"IP {check}: {ip}")
+        self.log(f"IP {check}: {ip}")
+        self.log(f"IP {check}: {ip}")
+        self.log(f"IP {check}: {ip}")
+        self.log(f"IP {check}: {ip}")
+
+        # Check IP after setting proxy
+        if check == 'before':
+            # Agregar un parámetro de consulta único
+            yield scrapy.Request('http://httpbin.org/ip?check=after', callback=self.check_ip, meta={'proxy': self.proxy_url, 'check': 'after'})
+        else:
+            for url in self.start_urls:
+                yield scrapy.Request(url, callback=self.parse, meta={'proxy': self.proxy_url})
 
     def parse(self, response):      
         """
@@ -99,27 +127,10 @@ class ComputrabajoSpider(scrapy.Spider):
             # Obtiene el tipo de empleo
             type_of_job = response.xpath("//div[@class='mb40 pb40 bb1'][@div-link='oferta']//div[@class='mbB']//span[@class='tag base mb10'][3]/text()").get()
             type_of_job = type_of_job.strip() if type_of_job else 'N/A'
-        
-            # Obtiene las palabras clave de la descripción del empleo
-            result_keywords = get_keywords(job_description, item['title'], item['company'], item['location'])
-            
-            if not result_keywords or not isinstance(result_keywords, dict):
-                self.logger.error("Failed to retrieve keywords or invalid response structure")
-                return
-            
-            # Formatea los resultados
-            item['soft_skills'] = ', '.join(result_keywords.get('Soft skills', [])) if result_keywords else 'N/A'
-            item['hard_skills'] = ', '.join(result_keywords.get('Hard skills', [])) if result_keywords else 'N/A'
-            item['education'] = ', '.join(result_keywords.get('Nivel educativo', [])) if result_keywords else 'N/A'
-            item['careers'] = ', '.join(result_keywords.get('Profesiones', [])) if result_keywords else 'N/A'
-            item['lgtbq'] = str(result_keywords.get('LGBTQ+', False)) if result_keywords else 'False'
-            item['seniority'] = str(result_keywords.get('Seniority', 'no especificado')) if result_keywords else 'no especificado'
-            item['work_mode'] = str(result_keywords.get('Modalidad de trabajo', 'Presencial')) if result_keywords else 'Presencial'
             item['type_of_job'] = type_of_job
 
             # Guardar los datos en la base de datos
-            self.save_pre_db(item) # Guarda el item sin usar GPT-3.5
-            self.save_to_db(item)
+            self.save_pre_db(item)
         
         except Exception as e:
             self.logger.error(f"Error al procesar la descripción del empleo: {e}")
@@ -154,46 +165,6 @@ class ComputrabajoSpider(scrapy.Spider):
             session.add(job_record)
             session.commit()
             self.logger.info(f"Pre Item successfully saved to DB: {item['title']} at {item['company']}")
-        except SQLAlchemyError as e:
-            self.log(f"Error occurred during commit: {e}")
-            session.rollback()
-        finally:
-            session.close()
-
-    def save_to_db(self, item):
-        """
-        Saves the given item to the database.
-
-        Args:
-            item (dict): The item to be saved.
-
-        Returns:
-            None
-        """
-        session = SessionLocal()
-        try:
-            job_record = Job(
-                company_name=item['company'],
-                job_title=item['title'],
-                location=item['location'],
-                date=item['date'],
-                soft_skills=item.get('soft_skills'),
-                hard_skills=item.get('hard_skills'),
-                education=item.get('education'),
-                careers=item.get('careers'),
-                seniority=item.get('seniority'),
-                type_of_job=item.get('type_of_job'),
-                work_mode=(item.get('work_mode') or 'Presencial'),
-                lgtbq=item.get('lgtbq'),
-                platform=item['platform'],
-                link_url=item['link_url'],
-                keyword=item['keyword'],
-                state=1,
-                date_scraped=item['date_scraped']
-            )
-            session.add(job_record)
-            session.commit()
-            self.logger.info(f"Item successfully saved to DB: {item['title']} at {item['company']}")
         except SQLAlchemyError as e:
             self.log(f"Error occurred during commit: {e}")
             session.rollback()

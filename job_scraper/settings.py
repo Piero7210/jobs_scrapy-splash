@@ -16,6 +16,13 @@ NEWSPIDER_MODULE = "job_scraper.spiders"
 # Splash settings
 SPLASH_URL = 'http://localhost:8050'
 
+HTTPPROXY_ENABLED = True
+
+PROXY_LIST = [
+    'gw.dataimpulse.com:823',
+    # Agrega más proxies si es necesario
+]
+
 # Configure selenium
 SELENIUM_DRIVER_NAME = 'chrome'
 SELENIUM_DRIVER_EXECUTABLE_PATH = which('chromedriver')  # Assumes you have chromedriver in your PATH
@@ -65,6 +72,8 @@ SPIDER_MIDDLEWARES = {
 #    "job_scraper.middlewares.JobScraperDownloaderMiddleware": 543,
 #}
 DOWNLOADER_MIDDLEWARES = {
+    # 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
+    # 'scrapy.downloadermiddlewares.proxy.ProxyMiddleware': 100,
     'scrapy_splash.SplashCookiesMiddleware': 723,
     'scrapy_splash.SplashMiddleware': 725,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
