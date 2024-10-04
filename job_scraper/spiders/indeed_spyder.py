@@ -21,8 +21,9 @@ class IndeedSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
         super(IndeedSpider, self).__init__(*args, **kwargs)
         keywords_jobs = ['Asistente', 'Practicante', 'Asesor', 'Auxiliar', 'Analista', 'Tecnico', 'Ejecutivo', 'Diseñador', 'Representante', 'Desarrollador', 'Coordinador', 'Soporte', 'Jefe', 'Vendedor', 'Promotor', 'Atencion']
+        # keywords_jobs = ['Asistente']
         for keyword in keywords_jobs:
-            self.start_urls.extend([f'https://pe.indeed.com/jobs?q={keyword}&l=Lima&sort=date&fromage=7&start={i}' for i in range(0, 10, 10)])
+            self.start_urls.extend([f'https://pe.indeed.com/jobs?q={keyword}&l=Lima&sort=date&fromage=7&start={i}' for i in range(0, 10, 90)]) # Paginado de 10 en 10 (15 jobs por página)
             
     def start_requests(self):
         """
