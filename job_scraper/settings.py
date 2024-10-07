@@ -33,7 +33,9 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 2
+DOWNLOAD_DELAY = 3  # Añade un retraso de 3 segundos entre solicitudes
+RETRY_ENABLED = True
+RETRY_TIMES = 5  # Número de intentos de reintentar una solicitud
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -69,10 +71,16 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy_splash.SplashMiddleware': 725,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
     'scrapy_selenium.SeleniumMiddleware': 800,
+    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 1,
+    'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
+
 }
+
+# HTTP_PROXY = 'http://your_proxy_address:port'
 
 DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
+SPLASH_URL = 'http://localhost:8050'
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
