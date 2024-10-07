@@ -6,7 +6,8 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.exc import SQLAlchemyError
 
 # Configurar la base de datos MySQL
-DATABASE_URL = "mysql+pymysql://root:987210@localhost:3306/jobs_db"
+# DATABASE_URL = "mysql+pymysql://root:987210@localhost:3306/jobs_db"
+DATABASE_URL = "mysql+pymysql://root@localhost/jobs_db"
 
 # Ejemplo con Server
 # DATABASE_URL = "mysql+pymysql://slira:Slira$24@localhost/bd_dev"
