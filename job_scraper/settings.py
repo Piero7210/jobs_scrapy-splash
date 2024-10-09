@@ -79,7 +79,6 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy_splash.SplashCookiesMiddleware': 723,
     'scrapy_splash.SplashMiddleware': 725,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
-    'scrapy_selenium.SeleniumMiddleware': 800,
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 1,
     'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
 }

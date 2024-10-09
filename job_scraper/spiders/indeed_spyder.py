@@ -2,10 +2,8 @@ import scrapy
 from scrapy_splash import SplashRequest
 from datetime import datetime, timedelta
 from job_scraper.items import JobItem
-from job_scraper.utils.sql_alchemy import Job, SessionLocal  # Asegúrate de que esté bien configurado
-from job_scraper.utils.sql_alchemy_pre_db import PreJob
+from job_scraper.utils.sql_alchemy_pre_db import PreJob, SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
-from job_scraper.utils.description_extraction import get_keywords # Importa la función OpenAI Api
 import traceback
 
 class IndeedSpider(scrapy.Spider):
@@ -23,7 +21,7 @@ class IndeedSpider(scrapy.Spider):
         keywords_jobs = ['Asistente', 'Practicante', 'Asesor', 'Auxiliar', 'Analista', 'Tecnico', 'Ejecutivo', 'Diseñador', 'Representante', 'Desarrollador', 'Coordinador', 'Soporte', 'Jefe', 'Vendedor', 'Promotor', 'Atencion']
         # keywords_jobs = ['Asistente']
         for keyword in keywords_jobs:
-            self.start_urls.extend([f'https://pe.indeed.com/jobs?q={keyword}&l=Lima&sort=date&fromage=7&start={i}' for i in range(0, 10, 90)]) # Paginado de 10 en 10 (15 jobs por página)
+            self.start_urls.extend([f'https://pe.indeed.com/jobs?q={keyword}&l=Lima&sort=date&fromage=7&start={i}' for i in range(0, 10, 100)]) # Paginado de 10 en 10 (15 jobs por página)
             
     def start_requests(self):
         """
@@ -33,7 +31,8 @@ class IndeedSpider(scrapy.Spider):
             SplashRequest: A scrapy Request object with SplashRequest parameters.
         """
         for url in self.start_urls:
-            yield SplashRequest(url, self.parse, args={'wait': 5}, endpoint='render.html', meta={'proxy': self.proxy_url})
+            yield SplashRequest(url, self.parse, args={'wait': 2, 'proxy': self.proxy_url}, endpoint='render.html')
+            # yield SplashRequest(url, self.parse, args={'wait': 5}, endpoint='render.html')
 
     def parse(self, response):
         """
@@ -119,33 +118,20 @@ class IndeedSpider(scrapy.Spider):
             # Combina los párrafos en una sola cadena
             job_description = '\n'.join(job_description_paragraphs)
             item['description'] = job_description
-                    
-            # Selecciona el tercer <h2> (ajusta el índice según sea necesario)
-            type_of_job = response.css('div.js-match-insights-provider-tvvxwd.ecydgvn1::text').get()
-            if type_of_job in ['Tiempo completo', 'Tiempo parcial', 'Por contrato', 'Indefinido', 'Temporal', 'Medio tiempo']:
-                type_of_job = type_of_job.strip()
+            
+            # Obtiene el tipo de empleo
+            type_of_job = response.css('div.js-match-insights-provider-1m98ica.e1xnxm2i0::attr(data-testid)').get()
+            type_of_job = type_of_job.split('-')[0] if type_of_job else 'Tiempo completo'            
+            # Verifica si type_of_job tiene un valor y es uno de los tipos esperados
+            if type_of_job and type_of_job in ['Tiempo completo', 'Tiempo parcial', 'Por contrato', 'Indefinido', 'Temporal', 'Medio tiempo']:
+                type_of_job = type_of_job.strip()  # Limpia el texto
             else:
-                type_of_job = 'No especificado'
-            
-            # Obtiene las palabras clave de la descripción del empleo
-            result_keywords = get_keywords(job_description, item['title'], item['company'], item['location'])
-            if not result_keywords or not isinstance(result_keywords, dict):
-                print("Failed to retrieve keywords or invalid response structure")
-                return None
-            
-            # Formatea los resultados
-            item['soft_skills'] = ', '.join(result_keywords.get('Soft skills', [])) if result_keywords else 'N/A'
-            item['hard_skills'] = ', '.join(result_keywords.get('Hard skills', [])) if result_keywords else 'N/A'
-            item['education'] = ', '.join(result_keywords.get('Nivel educativo', [])) if result_keywords else 'N/A'
-            item['careers'] = ', '.join(result_keywords.get('Profesiones', [])) if result_keywords else 'N/A'
-            item['lgtbq'] = str(result_keywords.get('LGBTQ+', False)) if result_keywords else 'False'
-            item['seniority'] = str(result_keywords.get('Seniority', 'no especificado')) if result_keywords else 'no especificado'
-            item['work_mode'] = str(result_keywords.get('Modalidad de trabajo', 'Presencial')) if result_keywords else 'Presencial'
+                type_of_job = 'Tiempo completo'  # Valor por defecto si no coincide
+                
             item['type_of_job'] = type_of_job
             
             # Guardar los datos en la base de datos
             self.save_pre_db(item) # Guarda el item sin usar GPT-3.5
-            self.save_to_db(item)
     
         except Exception as e:
             self.logger.error(f"Error al procesar la descripción del empleo: {e}")
@@ -181,49 +167,6 @@ class IndeedSpider(scrapy.Spider):
             session.add(job_record)
             session.commit()
             self.logger.info(f"Pre Item successfully saved to DB: {item['title']} at {item['company']}")
-        except SQLAlchemyError as e:
-            self.log(f"Error occurred during commit: {e}")
-            session.rollback()
-        finally:
-            session.close()
-        
-    def save_to_db(self, item):
-        """
-        Saves the scraped job data to the database.
-
-        Parameters:
-        - item (dict): A dictionary containing the job data.
-
-        Returns:
-        - None
-
-        Raises:
-        - SQLAlchemyError: If an error occurs during the database commit.
-
-        """
-        session = SessionLocal()
-        try:
-            job_record = Job(
-                company_name=item['company'],
-                job_title=item['title'],
-                location=item['location'],
-                date=item['date'],
-                soft_skills=item.get('soft_skills'),
-                hard_skills=item.get('hard_skills'),
-                education=item.get('education'),
-                careers=item.get('careers'),
-                seniority=item.get('seniority'),
-                type_of_job=item.get('type_of_job'),
-                work_mode=(item.get('work_mode') or 'Presencial'),
-                lgtbq=item.get('lgtbq'),
-                platform=item['platform'],
-                link_url=item['link_url'],
-                keyword=item['keyword'],
-                state=1,
-                date_scraped=item['date_scraped']
-            )
-            session.add(job_record)
-            session.commit()
         except SQLAlchemyError as e:
             self.log(f"Error occurred during commit: {e}")
             session.rollback()

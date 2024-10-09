@@ -1,10 +1,8 @@
 import scrapy
 from datetime import datetime, timedelta
 from job_scraper.items import JobItem  # Asegúrate de que el JobItem esté definido en items.py
-from job_scraper.utils.sql_alchemy import Job, SessionLocal  # Asegúrate de que esté bien configurado
-from job_scraper.utils.sql_alchemy_pre_db import PreJob
+from job_scraper.utils.sql_alchemy_pre_db import PreJob, SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
-from job_scraper.utils.langchain_descript_extraction import get_keywords # Importa la función OpenAI Api
 import traceback
 
 class ComputrabajoSpider(scrapy.Spider):
