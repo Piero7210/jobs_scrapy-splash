@@ -110,13 +110,17 @@ class IndeedSpider(scrapy.Spider):
 
             # Itera sobre los elementos dentro del target_div
             if target_div:
-                for element in response.css('div.jobsearch-JobComponent-description p, div.jobsearch-JobComponent-description li'):
+                for element in target_div.css('p, li'):
                     # Usa .css('::text') para obtener solo el texto dentro de los elementos
                     paragraph = element.css('::text').getall()
-                    job_description_paragraphs.append(' '.join(paragraph).strip())
+                    # Combina el texto y añade solo si no está vacío
+                    cleaned_paragraph = ' '.join(paragraph).strip()
+                    if cleaned_paragraph:
+                        job_description_paragraphs.append(cleaned_paragraph)
 
-            # Combina los párrafos en una sola cadena
+            # Combina los párrafos en una sola cadena con dos saltos de línea
             job_description = '\n'.join(job_description_paragraphs)
+            job_description = job_description.split('{flex:0 0 auto;min-width:0;}')[1]
             item['description'] = job_description
             
             # Obtiene el tipo de empleo
