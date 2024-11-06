@@ -18,8 +18,8 @@ class IndeedSpider(scrapy.Spider):
     # Generar las URLs iniciales para cada palabra clave
     def __init__(self, *args, **kwargs):
         super(IndeedSpider, self).__init__(*args, **kwargs)
-        keywords_jobs = ['Asistente', 'Practicante', 'Asesor', 'Auxiliar', 'Analista', 'Tecnico', 'Ejecutivo', 'Diseñador', 'Representante', 'Desarrollador', 'Coordinador', 'Soporte', 'Jefe', 'Vendedor', 'Promotor', 'Atencion']
-        # keywords_jobs = ['Asistente']
+        # keywords_jobs = ['Asistente', 'Practicante', 'Asesor', 'Auxiliar', 'Analista', 'Tecnico', 'Ejecutivo', 'Diseñador', 'Representante', 'Desarrollador', 'Coordinador', 'Soporte', 'Jefe', 'Vendedor', 'Promotor', 'Atencion']
+        keywords_jobs = ['Asistente']
         for keyword in keywords_jobs:
             self.start_urls.extend([f'https://pe.indeed.com/jobs?q={keyword}&l=Lima&sort=date&fromage=7&start={i}' for i in range(0, 10, 100)]) # Paginado de 10 en 10 (15 jobs por página)
             
@@ -31,8 +31,8 @@ class IndeedSpider(scrapy.Spider):
             SplashRequest: A scrapy Request object with SplashRequest parameters.
         """
         for url in self.start_urls:
-            yield SplashRequest(url, self.parse, args={'wait': 2, 'proxy': self.proxy_url}, endpoint='render.html')
-            # yield SplashRequest(url, self.parse, args={'wait': 5}, endpoint='render.html')
+            # yield SplashRequest(url, self.parse, args={'wait': 2, 'proxy': self.proxy_url}, endpoint='render.html')
+            yield SplashRequest(url, self.parse, args={'wait': 5}, endpoint='render.html')
 
     def parse(self, response):
         """
@@ -58,16 +58,16 @@ class IndeedSpider(scrapy.Spider):
                 job_title_element = job.css('h2.jobTitle span::text').get()
                 item['title'] = job_title_element.strip() if job_title_element else None
                 
-                # Obtiene el nombre de la empresa
-                company_title = job.css('div.css-1qv0295 span::text').get()
+                # Obtiene el nombre de la empresa 
+                company_title = job.css('span.css-1h7lukg::text').get() #!CAMBIO
                 item['company'] = company_title.strip() if company_title else None
                 
                 # Obtiene la ubicación del empleo
-                job_location = job.css('div.css-1p0sjhy::text').get()
+                job_location = job.css('div.css-1restlb::text').get() #!CAMBIO
                 item['location'] = job_location.strip() if job_location else None
                 
                 # Obtiene la fecha de publicación del empleo
-                job_date = job.css('span.css-qvloho::text').get()
+                job_date = job.css('span.css-16euvrx::text').get() #!CAMBIO
                 item['date'] = self.convert_to_date(job_date)
                 
                 # Obtiene la URL de la descripción del empleo
